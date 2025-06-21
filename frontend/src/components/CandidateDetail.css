@@ -1,0 +1,363 @@
+.candidate-detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.candidate-detail-card {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.candidate-detail-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.detail-header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.back-button,
+.edit-button {
+  background: none;
+  border: 2px solid #667eea;
+  color: #667eea;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover,
+.edit-button:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.edit-button {
+  background: #667eea;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #5a6fd8;
+}
+
+.candidate-detail-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 30px;
+}
+
+.candidate-detail-image {
+  flex-shrink: 0;
+}
+
+.candidate-detail-image img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 6px solid #f0f0f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.candidate-detail-info {
+  flex: 1;
+}
+
+.candidate-detail-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.candidate-detail-party {
+  margin-bottom: 15px;
+}
+
+.party-badge {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.candidate-detail-id {
+  color: #666;
+  font-size: 1rem;
+}
+
+.candidate-detail-content {
+  margin-bottom: 40px;
+}
+
+.detail-section {
+  margin-bottom: 40px;
+}
+
+.detail-section h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.candidate-detail-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 0;
+}
+
+.campaign-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: #f8f9ff;
+  border-radius: 15px;
+  border-left: 4px solid #667eea;
+}
+
+.highlight-icon {
+  font-size: 2rem;
+}
+
+.highlight-item span:last-child {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.contact-info {
+  display: grid;
+  gap: 15px;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  padding: 15px 20px;
+  background: #f8f9ff;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.contact-label {
+  font-weight: 600;
+  color: #333;
+  min-width: 100px;
+  margin-right: 15px;
+}
+
+.contact-value {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.candidate-detail-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  padding: 15px 30px;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.action-button.primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.action-button.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.action-button.secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.action-button.secondary:hover {
+  background: #667eea;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: white;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  text-align: center;
+  color: white;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message h2 {
+  margin-bottom: 15px;
+  font-size: 2rem;
+}
+
+.error-message button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .candidate-detail-container {
+    padding: 15px;
+  }
+  
+  .candidate-detail-card {
+    padding: 25px;
+  }
+  
+  .detail-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .back-button,
+  .edit-button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .candidate-detail-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .candidate-detail-image img {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .candidate-detail-name {
+    font-size: 2rem;
+  }
+  
+  .campaign-highlights {
+    grid-template-columns: 1fr;
+  }
+  
+  .candidate-detail-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .action-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .candidate-detail-card {
+    padding: 20px;
+  }
+  
+  .candidate-detail-name {
+    font-size: 1.8rem;
+  }
+  
+  .detail-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .contact-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .contact-label {
+    min-width: auto;
+    margin-right: 0;
+  }
+} 
