@@ -222,6 +222,210 @@ class DatabaseService {
     static isValidParty(party) {
         return supabase_1.PARTY_TYPES.includes(party);
     }
+    // User Authentication Methods
+    static registerUser(cnp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabaseAdmin
+                    .from('users')
+                    .insert([{ cnp }])
+                    .select()
+                    .single();
+                if (error) {
+                    console.error('Error registering user:', error);
+                    throw new Error(error.message);
+                }
+                return data;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static loginUser(cnp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabase
+                    .from('users')
+                    .select('*')
+                    .eq('cnp', cnp)
+                    .single();
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        // No rows returned
+                        return null;
+                    }
+                    console.error('Error logging in user:', error);
+                    throw new Error('Failed to login user');
+                }
+                return data;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getUserByCnp(cnp) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabase
+                    .from('users')
+                    .select('*')
+                    .eq('cnp', cnp)
+                    .single();
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        return null;
+                    }
+                    console.error('Error fetching user:', error);
+                    throw new Error('Failed to fetch user');
+                }
+                return data;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    // Voting Methods
+    static voteForCandidate(userId, candidateId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                // Check if user already voted for ANY candidate (only one vote allowed per user)
+                const existingVote = yield this.getUserVotes(userId);
+                if (existingVote.length > 0) {
+                    throw new Error('You have already voted. You can only vote once.');
+                }
+                // Check if candidate exists
+                const candidate = yield this.getCandidateById(candidateId);
+                if (!candidate) {
+                    throw new Error('Candidate not found');
+                }
+                const { data, error } = yield supabase_1.supabaseAdmin
+                    .from('votes')
+                    .insert([{ user_id: userId, candidate_id: candidateId }])
+                    .select()
+                    .single();
+                if (error) {
+                    console.error('Error creating vote:', error);
+                    throw new Error('Failed to create vote');
+                }
+                return data;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getUserVoteForCandidate(userId, candidateId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabase
+                    .from('votes')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('candidate_id', candidateId)
+                    .single();
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        return null;
+                    }
+                    console.error('Error fetching user vote:', error);
+                    throw new Error('Failed to fetch user vote');
+                }
+                return data;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getUserVotes(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabase
+                    .from('votes')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .order('created_at', { ascending: false });
+                if (error) {
+                    console.error('Error fetching user votes:', error);
+                    throw new Error('Failed to fetch user votes');
+                }
+                return data || [];
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static hasUserVoted(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const votes = yield this.getUserVotes(userId);
+                return votes.length > 0;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getUserVote(userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const votes = yield this.getUserVotes(userId);
+                return votes.length > 0 ? votes[0] : null;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getVoteStatistics() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { data, error } = yield supabase_1.supabase
+                    .from('vote_statistics')
+                    .select('*')
+                    .order('vote_count', { ascending: false });
+                if (error) {
+                    console.error('Error fetching vote statistics:', error);
+                    throw new Error('Failed to fetch vote statistics');
+                }
+                return data || [];
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
+    static getTotalVotes() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const { count, error } = yield supabase_1.supabase
+                    .from('votes')
+                    .select('*', { count: 'exact', head: true });
+                if (error) {
+                    console.error('Error fetching total votes:', error);
+                    throw new Error('Failed to fetch total votes');
+                }
+                return count || 0;
+            }
+            catch (error) {
+                console.error('Database error:', error);
+                throw error;
+            }
+        });
+    }
 }
 exports.DatabaseService = DatabaseService;
 //# sourceMappingURL=databaseService.js.map

@@ -6,26 +6,28 @@ export interface Candidate {
   id: number;
   name: string;
   description: string;
-  image: string; // URL to the candidate's image
+  image_url: string; // URL to the candidate's image
   party: Party;
 }
 
 export interface CreateCandidateRequest {
   name: string;
   description: string;
-  image: string;
+  image_url: string;
   party: Party;
 }
 
 export interface UpdateCandidateRequest {
   name?: string;
   description?: string;
-  image?: string;
+  image_url?: string;
   party?: Party;
 }
 
 export const ALLOWED_PARTIES: Party[] = ['PSD', 'PNL', 'POT', 'AUR', 'Independent'];
 
+//keep the api url public
+//const API_BASE_URL = 'https://exam-mpp-2-production.up.railway.app/api';
 const API_BASE_URL = 'http://localhost:3001/api';
 
 // API service functions
@@ -121,7 +123,7 @@ export const deleteCandidate = async (id: number): Promise<void> => {
 // Statistics API functions
 export const getStatistics = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/statistics`);
+    const response = await fetch(`${API_BASE_URL}/statistics/party`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -134,7 +136,7 @@ export const getStatistics = async () => {
 
 export const generateFakeCandidate = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/statistics/generate`, {
+    const response = await fetch(`${API_BASE_URL}/candidates/generate`, {
       method: 'POST',
     });
     

@@ -3,6 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import candidateRoutes from './routes/candidateRoutes';
 import statisticsRoutes from './routes/statisticsRoutes';
+import authRoutes from './routes/authRoutes';
+import voteRoutes from './routes/voteRoutes';
+import { authenticateUser, optionalAuth } from './middleware/auth';
 
 // Load environment variables
 dotenv.config();
@@ -19,11 +22,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/candidates', candidateRoutes);
-app.use('/api/statistics', statisticsRoutes);
+// Public routes (no authentication required)
+app.use('/api/auth', authRoutes);
 
-// Health check endpoint
+// Protected routes (authentication required)
+app.use('/api/candidates', authenticateUser, candidateRoutes);
+app.use('/api/statistics', authenticateUser, statisticsRoutes);
+app.use('/api/votes', voteRoutes); // Already has auth middleware
+
+// Health check endpoint (public)
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 

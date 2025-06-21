@@ -1,4 +1,6 @@
 import { supabase, supabaseAdmin, TABLES, PARTY_TYPES, Candidate, CreateCandidateRequest, UpdateCandidateRequest, PartyStatistics } from '../config/supabase';
+import { User } from '../config/user';
+import { Vote, CreateVoteRequest, VoteStatistics } from '../config/vote';
 
 export class DatabaseService {
   // Get all candidates
@@ -213,5 +215,207 @@ export class DatabaseService {
   // Validate party type
   static isValidParty(party: string): party is Candidate['party'] {
     return PARTY_TYPES.includes(party as any);
+  }
+
+  // User Authentication Methods
+  static async registerUser(cnp: string): Promise<User> {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('users')
+        .insert([{ cnp }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error registering user:', error);
+        throw new Error(error.message);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async loginUser(cnp: string): Promise<User | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('cnp', cnp)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned
+          return null;
+        }
+        console.error('Error logging in user:', error);
+        throw new Error('Failed to login user');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getUserByCnp(cnp: string): Promise<User | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('cnp', cnp)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        console.error('Error fetching user:', error);
+        throw new Error('Failed to fetch user');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  // Voting Methods
+  static async voteForCandidate(userId: number, candidateId: number): Promise<Vote> {
+    try {
+      // Check if user already voted for ANY candidate (only one vote allowed per user)
+      const existingVote = await this.getUserVotes(userId);
+      if (existingVote.length > 0) {
+        throw new Error('You have already voted. You can only vote once.');
+      }
+
+      // Check if candidate exists
+      const candidate = await this.getCandidateById(candidateId);
+      if (!candidate) {
+        throw new Error('Candidate not found');
+      }
+
+      const { data, error } = await supabaseAdmin
+        .from('votes')
+        .insert([{ user_id: userId, candidate_id: candidateId }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating vote:', error);
+        throw new Error('Failed to create vote');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getUserVoteForCandidate(userId: number, candidateId: number): Promise<Vote | null> {
+    try {
+      const { data, error } = await supabase
+        .from('votes')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('candidate_id', candidateId)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null;
+        }
+        console.error('Error fetching user vote:', error);
+        throw new Error('Failed to fetch user vote');
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getUserVotes(userId: number): Promise<Vote[]> {
+    try {
+      const { data, error } = await supabase
+        .from('votes')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching user votes:', error);
+        throw new Error('Failed to fetch user votes');
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async hasUserVoted(userId: number): Promise<boolean> {
+    try {
+      const votes = await this.getUserVotes(userId);
+      return votes.length > 0;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getUserVote(userId: number): Promise<Vote | null> {
+    try {
+      const votes = await this.getUserVotes(userId);
+      return votes.length > 0 ? votes[0] : null;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getVoteStatistics(): Promise<VoteStatistics[]> {
+    try {
+      const { data, error } = await supabase
+        .from('vote_statistics')
+        .select('*')
+        .order('vote_count', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching vote statistics:', error);
+        throw new Error('Failed to fetch vote statistics');
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
+  }
+
+  static async getTotalVotes(): Promise<number> {
+    try {
+      const { count, error } = await supabase
+        .from('votes')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('Error fetching total votes:', error);
+        throw new Error('Failed to fetch total votes');
+      }
+
+      return count || 0;
+    } catch (error) {
+      console.error('Database error:', error);
+      throw error;
+    }
   }
 } 

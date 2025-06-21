@@ -195,3 +195,109 @@ After setting up the database:
 4. Deploy your application
 
 The database is now ready for your Election Candidates application! 🚀 
+
+# Database Setup Instructions
+
+## Prerequisites
+- Supabase project set up
+- Database connection established
+
+## Setup Steps
+
+### 1. Create Users Table
+First, run the users table setup script:
+```sql
+-- Execute the contents of users_setup.sql
+```
+
+### 2. Create Candidates Table
+Run the candidates table setup script:
+```sql
+-- Execute the contents of supabase_setup.sql
+```
+
+### 3. Create Votes Table
+Run the votes table setup script:
+```sql
+-- Execute the contents of votes_setup_simple.sql
+```
+
+## How to Execute SQL Scripts
+
+### Option 1: Supabase Dashboard
+1. Go to your Supabase project dashboard
+2. Navigate to the SQL Editor
+3. Copy and paste the contents of each SQL file
+4. Click "Run" to execute
+
+### Option 2: Supabase CLI
+```bash
+# Install Supabase CLI if you haven't already
+npm install -g supabase
+
+# Login to Supabase
+supabase login
+
+# Link your project
+supabase link --project-ref YOUR_PROJECT_REF
+
+# Run the SQL scripts
+supabase db push
+```
+
+### Option 3: Direct Database Connection
+If you have direct access to your PostgreSQL database:
+```bash
+psql -h YOUR_HOST -U YOUR_USER -d YOUR_DATABASE -f votes_setup_simple.sql
+```
+
+## Verification
+
+After running the scripts, you should have:
+- ✅ `users` table with CNP field
+- ✅ `candidates` table with party enum
+- ✅ `votes` table with user and candidate references
+- ✅ `vote_statistics` view for vote analytics
+- ✅ Proper indexes for performance
+
+## Troubleshooting
+
+### "relation does not exist" errors
+- Make sure you've run all the SQL scripts in order
+- Check that you're connected to the correct database
+- Verify that the tables were created successfully
+
+### Permission errors
+- Ensure your database user has the necessary privileges
+- Check that the GRANT statements in the scripts executed successfully
+
+### Foreign key constraint errors
+- Make sure the `users` and `candidates` tables exist before creating the `votes` table
+- Verify that the referenced columns have the correct data types
+
+## Testing the Setup
+
+You can test if everything is working by running these queries:
+
+```sql
+-- Check if tables exist
+SELECT table_name FROM information_schema.tables 
+WHERE table_schema = 'public' AND table_name IN ('users', 'candidates', 'votes');
+
+-- Check if view exists
+SELECT table_name FROM information_schema.views 
+WHERE table_schema = 'public' AND table_name = 'vote_statistics';
+
+-- Test inserting a vote (replace with actual user_id and candidate_id)
+INSERT INTO votes (user_id, candidate_id) VALUES (1, 1);
+```
+
+## Environment Variables
+
+Make sure your backend has the correct environment variables set in `.env`:
+
+```env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+``` 

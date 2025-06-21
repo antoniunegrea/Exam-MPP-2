@@ -1,62 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import { Candidate, ALLOWED_PARTIES, Party, createCandidate, updateCandidate } from '../types/Candidate';
+import { ALLOWED_PARTIES, Party } from '../types/Candidate';
 import './CandidateForm.css';
+
+interface Candidate {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  party: string;
+  created_at: string;
+}
 
 interface CandidateFormProps {
   candidate?: Candidate | null;
-  onSave: (candidate: Candidate) => void;
+  onSubmit: (candidateData: Omit<Candidate, 'id' | 'created_at'>) => void;
   onCancel: () => void;
-  mode: 'create' | 'edit';
 }
 
 const CandidateForm: React.FC<CandidateFormProps> = ({ 
   candidate, 
-  onSave, 
-  onCancel, 
-  mode 
+  onSubmit, 
+  onCancel
 }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    image: '',
-    party: 'Independent' as Party
+    image_url: '',
+    party: 'Independent' as string
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (candidate && mode === 'edit') {
+    if (candidate) {
       setFormData({
         name: candidate.name,
         description: candidate.description,
-        image: candidate.image,
+        image_url: candidate.image_url,
         party: candidate.party
       });
     }
-  }, [candidate, mode]);
+  }, [candidate]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.name.trim()) {
+    if (!formData.name || !formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
       newErrors.name = 'Name must be at least 2 characters long';
     }
 
-    if (!formData.description.trim()) {
+    if (!formData.description || !formData.description.trim()) {
       newErrors.description = 'Description is required';
     } else if (formData.description.trim().length < 10) {
       newErrors.description = 'Description must be at least 10 characters long';
     }
 
-    if (!formData.image.trim()) {
-      newErrors.image = 'Image URL is required';
-    } else if (!isValidUrl(formData.image)) {
-      newErrors.image = 'Please enter a valid URL';
+    if (!formData.image_url || !formData.image_url.trim()) {
+      newErrors.image_url = 'Image URL is required';
+    } else if (!isValidUrl(formData.image_url)) {
+      newErrors.image_url = 'Please enter a valid URL';
     }
 
-    if (!ALLOWED_PARTIES.includes(formData.party)) {
+    if (!ALLOWED_PARTIES.includes(formData.party as any)) {
       newErrors.party = 'Please select a valid party';
     }
 
@@ -98,18 +105,7 @@ const CandidateForm: React.FC<CandidateFormProps> = ({
 
     setIsSubmitting(true);
     try {
-      let savedCandidate: Candidate;
-
-      if (mode === 'create') {
-        savedCandidate = await createCandidate(formData);
-      } else {
-        if (!candidate) {
-          throw new Error('No candidate to update');
-        }
-        savedCandidate = await updateCandidate(candidate.id, formData);
-      }
-
-      onSave(savedCandidate);
+      onSubmit(formData);
     } catch (err) {
       console.error('Error saving candidate:', err);
       alert('Failed to save candidate. Please try again.');
@@ -132,7 +128,7 @@ const CandidateForm: React.FC<CandidateFormProps> = ({
     <div className="form-overlay">
       <div className="form-modal">
         <div className="form-header">
-          <h2>{mode === 'create' ? 'Add New Candidate' : 'Edit Candidate'}</h2>
+          <h2>{candidate ? 'Edit Candidate' : 'Add New Candidate'}</h2>
           <button className="close-button" onClick={handleCancel}>
             Close
           </button>
@@ -172,21 +168,21 @@ const CandidateForm: React.FC<CandidateFormProps> = ({
           </div>
 
           <div className="form-group">
-            <label htmlFor="image">Image URL *</label>
+            <label htmlFor="image_url">Image URL *</label>
             <input
               type="url"
-              id="image"
-              name="image"
-              value={formData.image}
+              id="image_url"
+              name="image_url"
+              value={formData.image_url}
               onChange={handleInputChange}
-              className={errors.image ? 'error' : ''}
+              className={errors.image_url ? 'error' : ''}
               placeholder="https://example.com/image.jpg"
             />
-            {errors.image && <span className="error-message">{errors.image}</span>}
-            {formData.image && (
+            {errors.image_url && <span className="error-message">{errors.image_url}</span>}
+            {formData.image_url && (
               <div className="image-preview">
                 <img
-                  src={formData.image}
+                  src={formData.image_url}
                   alt="Preview"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -205,20 +201,17 @@ const CandidateForm: React.FC<CandidateFormProps> = ({
               value={formData.description}
               onChange={handleInputChange}
               className={errors.description ? 'error' : ''}
-              placeholder="Enter candidate's description and campaign details"
+              placeholder="Enter candidate's campaign description"
               rows={4}
             />
             {errors.description && <span className="error-message">{errors.description}</span>}
-            <div className="character-count">
-              {formData.description.length}/500 characters
-            </div>
           </div>
 
           <div className="form-actions">
             <button
               type="button"
-              className="cancel-button"
               onClick={handleCancel}
+              className="cancel-button"
               disabled={isSubmitting}
             >
               Cancel
@@ -228,7 +221,7 @@ const CandidateForm: React.FC<CandidateFormProps> = ({
               className="save-button"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Saving...' : (mode === 'create' ? 'Add Candidate' : 'Update Candidate')}
+              {isSubmitting ? 'Saving...' : (candidate ? 'Update' : 'Create')}
             </button>
           </div>
         </form>

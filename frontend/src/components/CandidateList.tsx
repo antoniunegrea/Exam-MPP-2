@@ -1,218 +1,279 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Candidate, getCandidates, deleteCandidate } from '../types/Candidate';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import CandidateForm from './CandidateForm';
 import './CandidateList.css';
+
+interface Candidate {
+  id: number;
+  name: string;
+  description: string;
+  image_url: string;
+  party: string;
+  created_at: string;
+}
+
+interface VoteStatus {
+  [key: number]: boolean;
+}
 
 const CandidateList: React.FC = () => {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const [showForm, setShowForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState<Candidate | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const navigate = useNavigate();
+  const [voteStatuses, setVoteStatuses] = useState<VoteStatus>({});
+  const [voting, setVoting] = useState<number | null>(null);
+  const { user, logout } = useAuth();
 
-  const fetchCandidates = useCallback(async () => {
-    // Prevent multiple fetches
-    if (hasLoaded) {
-      return;
-    }
+  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
-    console.log('Fetching candidates...'); // Debug log
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${user?.cnp}`
+  });
+
+  const fetchCandidates = async () => {
     try {
-      setLoading(true);
-      const data = await getCandidates();
-      console.log('Candidates fetched:', data.length); // Debug log
+      const response = await fetch(`${API_BASE_URL}/api/candidates`, {
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          logout();
+          return;
+        }
+        throw new Error('Failed to fetch candidates');
+      }
+
+      const data = await response.json();
       setCandidates(data);
-      setHasLoaded(true);
     } catch (err) {
-      console.error('Error fetching candidates:', err);
-      setError('Failed to load candidates');
+      setError(err instanceof Error ? err.message : 'Failed to fetch candidates');
     } finally {
       setLoading(false);
     }
-  }, [hasLoaded]);
+  };
+
+  const fetchVoteStatuses = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/votes/user-vote`, {
+        headers: getAuthHeaders()
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.hasVoted && data.vote) {
+          // User has voted, mark that specific candidate as voted
+          setVoteStatuses(prev => ({
+            ...prev,
+            [data.vote.candidate_id]: true
+          }));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch vote status:', err);
+    }
+  };
 
   useEffect(() => {
     fetchCandidates();
-  }, [fetchCandidates]);
+    fetchVoteStatuses();
+  }, []);
 
-  const handleCandidateClick = (candidateId: number) => {
-    navigate(`/candidate/${candidateId}`);
+  const handleVote = async (candidateId: number) => {
+    if (voting === candidateId) return;
+
+    setVoting(candidateId);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/votes/vote`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ candidate_id: candidateId })
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Failed to vote');
+      }
+
+      // Update vote status - user can only vote once, so disable all vote buttons
+      const allCandidates = candidates.map(c => c.id);
+      const newVoteStatuses: VoteStatus = {};
+      allCandidates.forEach(id => {
+        newVoteStatuses[id] = id === candidateId; // Only the voted candidate is true
+      });
+      setVoteStatuses(newVoteStatuses);
+
+      // Show success message
+      alert('Vote recorded successfully! You can only vote once.');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to vote');
+    } finally {
+      setVoting(null);
+    }
   };
 
-  const handleAddCandidate = () => {
-    setFormMode('create');
-    setEditingCandidate(null);
-    setShowForm(true);
+  const handleAddCandidate = async (candidateData: Omit<Candidate, 'id' | 'created_at'>) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/candidates`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(candidateData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add candidate');
+      }
+
+      const newCandidate = await response.json();
+      setCandidates(prev => [newCandidate, ...prev]);
+      setShowAddForm(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add candidate');
+    }
   };
 
-  const handleStatisticsClick = () => {
-    navigate('/statistics');
+  const handleUpdateCandidate = async (id: number, candidateData: Partial<Candidate>) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/candidates/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(candidateData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update candidate');
+      }
+
+      const updatedCandidate = await response.json();
+      setCandidates(prev => prev.map(c => c.id === id ? updatedCandidate : c));
+      setEditingCandidate(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update candidate');
+    }
   };
 
-  const handleEditCandidate = (e: React.MouseEvent, candidate: Candidate) => {
-    e.stopPropagation(); // Prevent navigation to detail page
-    setFormMode('edit');
-    setEditingCandidate(candidate);
-    setShowForm(true);
-  };
-
-  const handleDeleteCandidate = async (e: React.MouseEvent, candidateId: number) => {
-    e.stopPropagation(); // Prevent navigation to detail page
-    
+  const handleDeleteCandidate = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this candidate?')) {
       return;
     }
 
-    setDeletingId(candidateId);
     try {
-      await deleteCandidate(candidateId);
-      setCandidates(prev => prev.filter(c => c.id !== candidateId));
+      const response = await fetch(`${API_BASE_URL}/api/candidates/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete candidate');
+      }
+
+      setCandidates(prev => prev.filter(c => c.id !== id));
     } catch (err) {
-      console.error('Error deleting candidate:', err);
-      alert('Failed to delete candidate');
-    } finally {
-      setDeletingId(null);
+      setError(err instanceof Error ? err.message : 'Failed to delete candidate');
     }
-  };
-
-  const handleFormSave = (candidate: Candidate) => {
-    if (formMode === 'create') {
-      // Add new candidate to the list
-      setCandidates(prev => [...prev, candidate]);
-    } else {
-      // Update existing candidate in the list
-      setCandidates(prev => prev.map(c => c.id === candidate.id ? candidate : c));
-    }
-    setShowForm(false);
-    setEditingCandidate(null);
-  };
-
-  const handleFormCancel = () => {
-    setShowForm(false);
-    setEditingCandidate(null);
-  };
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    const target = e.target as HTMLImageElement;
-    // Use a more reliable placeholder service
-    target.src = 'https://picsum.photos/200/200?random=' + Math.random();
-    // Fallback to a data URL if the external service also fails
-    target.onerror = () => {
-      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjBGMEYwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD4KPC9zdmc+';
-    };
   };
 
   if (loading) {
-    return (
-      <div className="candidate-list-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Loading candidates...</p>
-        </div>
-      </div>
-    );
+    return <div className="loading">Loading candidates...</div>;
   }
 
   if (error) {
-    return (
-      <div className="candidate-list-container">
-        <div className="error-message">
-          <h2>Error</h2>
-          <p>{error}</p>
-          <button onClick={() => window.location.reload()}>Try Again</button>
-        </div>
-      </div>
-    );
+    return <div className="error">Error: {error}</div>;
   }
 
   return (
     <div className="candidate-list-container">
-      <header className="candidate-list-header">
-        <div className="header-content">
-          <h1>Election Candidates</h1>
-          <p>Click on a candidate to view their details</p>
-        </div>
+      <div className="header">
+        <h1>Election Candidates</h1>
         <div className="header-actions">
-          <button className="statistics-button" onClick={handleStatisticsClick}>
-            Statistics
-          </button>
-          <button className="add-candidate-button" onClick={handleAddCandidate}>
+          <button 
+            className="add-button"
+            onClick={() => setShowAddForm(true)}
+          >
             Add Candidate
           </button>
+          <Link to="/statistics" className="stats-link">
+            View Statistics
+          </Link>
+          <button onClick={logout} className="logout-button">
+            Logout
+          </button>
         </div>
-      </header>
-      
+      </div>
+
       <div className="candidates-grid">
-        {candidates.map((candidate) => (
-          <div
-            key={candidate.id}
-            className="candidate-card"
-            onClick={() => handleCandidateClick(candidate.id)}
-          >
-            <div className="candidate-image">
-              <img
-                src={candidate.image}
-                alt={candidate.name}
-                onError={handleImageError}
-              />
-            </div>
+        {candidates.map(candidate => (
+          <div key={candidate.id} className="candidate-card">
+            <img 
+              src={candidate.image_url} 
+              alt={candidate.name}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = `data:image/svg+xml;base64,${btoa(`
+                  <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                    <rect width="200" height="200" fill="#f0f0f0"/>
+                    <text x="100" y="100" text-anchor="middle" dy=".3em" fill="#666" font-size="14">No Image</text>
+                  </svg>
+                `)}`;
+              }}
+            />
             <div className="candidate-info">
-              <h3 className="candidate-name">{candidate.name}</h3>
-              <p className="candidate-party">{candidate.party}</p>
-              <p className="candidate-description">
-                {candidate.description.length > 100
-                  ? `${candidate.description.substring(0, 100)}...`
-                  : candidate.description}
-              </p>
+              <h3>{candidate.name}</h3>
+              <p className="party">{candidate.party}</p>
+              <p className="description">{candidate.description}</p>
             </div>
             <div className="candidate-actions">
+              <Link to={`/candidate/${candidate.id}`} className="view-button">
+                View Details
+              </Link>
+              <button
+                className={`vote-button ${voteStatuses[candidate.id] ? 'voted' : ''}`}
+                onClick={() => handleVote(candidate.id)}
+                disabled={Object.values(voteStatuses).some(voted => voted) || voting === candidate.id}
+              >
+                {voting === candidate.id ? 'Voting...' : 
+                 voteStatuses[candidate.id] ? 'Voted' : 
+                 Object.values(voteStatuses).some(voted => voted) ? 'Already Voted' : 'Vote'}
+              </button>
               <button
                 className="edit-button"
-                onClick={(e) => handleEditCandidate(e, candidate)}
-                title="Edit candidate"
+                onClick={() => setEditingCandidate(candidate)}
               >
                 Edit
               </button>
               <button
                 className="delete-button"
-                onClick={(e) => handleDeleteCandidate(e, candidate.id)}
-                disabled={deletingId === candidate.id}
-                title="Delete candidate"
+                onClick={() => handleDeleteCandidate(candidate.id)}
               >
-                {deletingId === candidate.id ? 'Deleting...' : 'Delete'}
+                Delete
               </button>
-            </div>
-            <div className="candidate-arrow">
-              <span>View Details</span>
             </div>
           </div>
         ))}
       </div>
-      
-      {candidates.length === 0 && (
-        <div className="no-candidates">
-          <h2>No candidates found</h2>
-          <p>There are currently no candidates available.</p>
-          <button className="add-candidate-button" onClick={handleAddCandidate}>
-            Add Your First Candidate
-          </button>
+
+      {showAddForm && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <CandidateForm
+              onSubmit={handleAddCandidate}
+              onCancel={() => setShowAddForm(false)}
+            />
+          </div>
         </div>
       )}
 
-      {/* Modal Form Overlay */}
-      {showForm && (
-        <div className="modal-overlay" onClick={handleFormCancel}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      {editingCandidate && (
+        <div className="modal-overlay">
+          <div className="modal">
             <CandidateForm
               candidate={editingCandidate}
-              onSave={handleFormSave}
-              onCancel={handleFormCancel}
-              mode={formMode}
+              onSubmit={(data) => handleUpdateCandidate(editingCandidate.id, data)}
+              onCancel={() => setEditingCandidate(null)}
             />
           </div>
         </div>
