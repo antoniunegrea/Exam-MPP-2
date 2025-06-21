@@ -1,15 +1,15 @@
 import { Router } from 'express';
-import {
-  getStatistics,
-  generateCandidate
-} from '../controllers/statisticsController';
+import { StatisticsController } from '../controllers/statisticsController';
 
 const router = Router();
 
-// GET /api/statistics - Get party statistics
-router.get('/', getStatistics);
+// Get party statistics
+router.get('/party', StatisticsController.getPartyStatistics);
 
-// POST /api/statistics/generate - Generate a fake candidate
-router.post('/generate', generateCandidate);
+// Get comprehensive statistics
+router.get('/comprehensive', StatisticsController.getComprehensiveStatistics);
+
+// Generate fake candidate
+router.post('/generate', StatisticsController.generateFakeCandidate);
 
 export default router; 

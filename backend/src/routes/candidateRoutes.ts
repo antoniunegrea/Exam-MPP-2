@@ -1,27 +1,24 @@
 import { Router } from 'express';
-import {
-  getCandidates,
-  getCandidate,
-  createCandidate,
-  updateCandidateById,
-  deleteCandidateById
-} from '../controllers/candidateController';
+import { CandidateController } from '../controllers/candidateController';
 
 const router = Router();
 
-// GET /api/candidates - Get all candidates
-router.get('/', getCandidates);
+// Get all candidates
+router.get('/', CandidateController.getAllCandidates);
 
-// GET /api/candidates/:id - Get candidate by ID
-router.get('/:id', getCandidate);
+// Get candidate by ID
+router.get('/:id', CandidateController.getCandidateById);
 
-// POST /api/candidates - Create new candidate
-router.post('/', createCandidate);
+// Create new candidate
+router.post('/', CandidateController.createCandidate);
 
-// PUT /api/candidates/:id - Update candidate
-router.put('/:id', updateCandidateById);
+// Update candidate
+router.put('/:id', CandidateController.updateCandidate);
 
-// DELETE /api/candidates/:id - Delete candidate
-router.delete('/:id', deleteCandidateById);
+// Delete candidate
+router.delete('/:id', CandidateController.deleteCandidate);
+
+// Generate fake candidate
+router.post('/generate', CandidateController.generateFakeCandidate);
 
 export default router; 
