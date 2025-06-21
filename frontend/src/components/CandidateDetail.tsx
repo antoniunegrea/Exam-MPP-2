@@ -105,10 +105,10 @@ const CandidateDetail: React.FC = () => {
       <div className="candidate-detail-card">
         <div className="detail-header-actions">
           <button className="back-button" onClick={handleBackClick}>
-            ← Back to Candidates
+            Back to Candidates
           </button>
           <button className="edit-button" onClick={handleEditClick}>
-            ✏️ Edit Candidate
+            Edit Candidate
           </button>
         </div>
         
@@ -142,15 +142,15 @@ const CandidateDetail: React.FC = () => {
             <h2>Campaign Focus</h2>
             <div className="campaign-highlights">
               <div className="highlight-item">
-                <span className="highlight-icon">🎯</span>
+                <span className="highlight-icon">Target</span>
                 <span>Leadership & Experience</span>
               </div>
               <div className="highlight-item">
-                <span className="highlight-icon">💡</span>
+                <span className="highlight-icon">Lightbulb</span>
                 <span>Innovation & Progress</span>
               </div>
               <div className="highlight-item">
-                <span className="highlight-icon">🤝</span>
+                <span className="highlight-icon">Handshake</span>
                 <span>Community Engagement</span>
               </div>
             </div>
@@ -181,13 +181,18 @@ const CandidateDetail: React.FC = () => {
         </div>
       </div>
 
+      {/* Modal Form Overlay */}
       {showEditForm && (
-        <CandidateForm
-          candidate={candidate}
-          onSave={handleFormSave}
-          onCancel={handleFormCancel}
-          mode="edit"
-        />
+        <div className="modal-overlay" onClick={handleFormCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <CandidateForm
+              candidate={candidate}
+              onSave={handleFormSave}
+              onCancel={handleFormCancel}
+              mode="edit"
+            />
+          </div>
+        </div>
       )}
     </div>
   );

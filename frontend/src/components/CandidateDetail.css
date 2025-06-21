@@ -1,5 +1,5 @@
 .candidate-detail-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
@@ -10,7 +10,8 @@
   background: white;
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
   position: relative;
   overflow: hidden;
 }
@@ -34,12 +35,11 @@
   gap: 15px;
 }
 
-.back-button,
-.edit-button {
-  background: none;
-  border: 2px solid #667eea;
+.back-button {
+  background: rgba(102, 126, 234, 0.1);
   color: #667eea;
-  padding: 10px 20px;
+  border: 2px solid #667eea;
+  padding: 12px 24px;
   border-radius: 25px;
   font-size: 1rem;
   font-weight: 600;
@@ -47,8 +47,7 @@
   transition: all 0.3s ease;
 }
 
-.back-button:hover,
-.edit-button:hover {
+.back-button:hover {
   background: #667eea;
   color: white;
   transform: translateY(-2px);
@@ -57,17 +56,27 @@
 .edit-button {
   background: #667eea;
   color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .edit-button:hover {
   background: #5a6fd8;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
 }
 
 .candidate-detail-header {
   display: flex;
   align-items: center;
-  margin-bottom: 40px;
   gap: 30px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
 }
 
 .candidate-detail-image {
@@ -80,11 +89,17 @@
   border-radius: 50%;
   object-fit: cover;
   border: 6px solid #f0f0f0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.candidate-detail-image img:hover {
+  transform: scale(1.05);
 }
 
 .candidate-detail-info {
   flex: 1;
+  min-width: 300px;
 }
 
 .candidate-detail-name {
@@ -92,6 +107,7 @@
   font-weight: 700;
   color: #333;
   margin-bottom: 15px;
+  line-height: 1.2;
 }
 
 .candidate-detail-party {
@@ -106,87 +122,107 @@
   font-size: 1.1rem;
   font-weight: 600;
   display: inline-block;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
 }
 
 .candidate-detail-id {
   color: #666;
   font-size: 1rem;
+  font-weight: 500;
 }
 
 .candidate-detail-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
   margin-bottom: 40px;
 }
 
 .detail-section {
-  margin-bottom: 40px;
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 15px;
+  border-left: 4px solid #667eea;
 }
 
 .detail-section h2 {
-  font-size: 1.8rem;
-  font-weight: 600;
   color: #333;
+  font-size: 1.4rem;
+  font-weight: 600;
   margin-bottom: 20px;
-  border-bottom: 2px solid #f0f0f0;
-  padding-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .candidate-detail-description {
-  font-size: 1.1rem;
-  line-height: 1.8;
   color: #555;
-  margin-bottom: 0;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  margin: 0;
 }
 
 .campaign-highlights {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .highlight-item {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 20px;
-  background: #f8f9ff;
-  border-radius: 15px;
-  border-left: 4px solid #667eea;
+  gap: 12px;
+  padding: 12px 15px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.highlight-item:hover {
+  transform: translateX(5px);
 }
 
 .highlight-icon {
-  font-size: 2rem;
-}
-
-.highlight-item span:last-child {
-  font-size: 1.1rem;
-  font-weight: 500;
-  color: #333;
+  background: #667eea;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  flex-shrink: 0;
 }
 
 .contact-info {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 15px;
 }
 
 .contact-item {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  background: #f8f9ff;
+  padding: 12px 15px;
+  background: white;
   border-radius: 10px;
-  border-left: 4px solid #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .contact-label {
   font-weight: 600;
   color: #333;
-  min-width: 100px;
-  margin-right: 15px;
+  min-width: 80px;
 }
 
 .contact-value {
   color: #667eea;
   font-weight: 500;
+  text-align: right;
 }
 
 .candidate-detail-actions {
@@ -198,12 +234,12 @@
 
 .action-button {
   padding: 15px 30px;
-  border: none;
-  border-radius: 30px;
+  border-radius: 25px;
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: none;
   min-width: 180px;
 }
 
@@ -214,7 +250,7 @@
 
 .action-button.primary:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
 }
 
 .action-button.secondary {
@@ -234,7 +270,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  height: 50vh;
   color: white;
 }
 
@@ -256,24 +292,25 @@
 .error-message {
   text-align: center;
   color: white;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  padding: 40px;
 }
 
 .error-message h2 {
-  margin-bottom: 15px;
   font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.error-message p {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  opacity: 0.9;
 }
 
 .error-message button {
-  margin-top: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   padding: 12px 24px;
-  background: white;
-  color: #667eea;
-  border: none;
   border-radius: 25px;
   font-size: 1rem;
   font-weight: 600;
@@ -282,8 +319,54 @@
 }
 
 .error-message button:hover {
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
+}
+
+/* Modal Overlay Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
 }
 
 /* Responsive Design */
@@ -296,6 +379,21 @@
     padding: 25px;
   }
   
+  .candidate-detail-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+  }
+  
+  .candidate-detail-name {
+    font-size: 2rem;
+  }
+  
+  .candidate-detail-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
   .detail-header-actions {
     flex-direction: column;
     align-items: stretch;
@@ -304,36 +402,14 @@
   .back-button,
   .edit-button {
     width: 100%;
-    text-align: center;
-  }
-  
-  .candidate-detail-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 20px;
-  }
-  
-  .candidate-detail-image img {
-    width: 150px;
-    height: 150px;
-  }
-  
-  .candidate-detail-name {
-    font-size: 2rem;
-  }
-  
-  .campaign-highlights {
-    grid-template-columns: 1fr;
   }
   
   .candidate-detail-actions {
     flex-direction: column;
-    align-items: center;
   }
   
   .action-button {
     width: 100%;
-    max-width: 300px;
   }
 }
 
@@ -346,18 +422,16 @@
     font-size: 1.8rem;
   }
   
+  .candidate-detail-image img {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .detail-section {
+    padding: 20px;
+  }
+  
   .detail-section h2 {
-    font-size: 1.5rem;
-  }
-  
-  .contact-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
-  }
-  
-  .contact-label {
-    min-width: auto;
-    margin-right: 0;
+    font-size: 1.2rem;
   }
 } 

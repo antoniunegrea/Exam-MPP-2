@@ -50,6 +50,10 @@ const CandidateList: React.FC = () => {
     setShowForm(true);
   };
 
+  const handleStatisticsClick = () => {
+    navigate('/statistics');
+  };
+
   const handleEditCandidate = (e: React.MouseEvent, candidate: Candidate) => {
     e.stopPropagation(); // Prevent navigation to detail page
     setFormMode('edit');
@@ -133,9 +137,14 @@ const CandidateList: React.FC = () => {
           <h1>Election Candidates</h1>
           <p>Click on a candidate to view their details</p>
         </div>
-        <button className="add-candidate-button" onClick={handleAddCandidate}>
-          + Add Candidate
-        </button>
+        <div className="header-actions">
+          <button className="statistics-button" onClick={handleStatisticsClick}>
+            Statistics
+          </button>
+          <button className="add-candidate-button" onClick={handleAddCandidate}>
+            Add Candidate
+          </button>
+        </div>
       </header>
       
       <div className="candidates-grid">
@@ -167,7 +176,7 @@ const CandidateList: React.FC = () => {
                 onClick={(e) => handleEditCandidate(e, candidate)}
                 title="Edit candidate"
               >
-                ✏️
+                Edit
               </button>
               <button
                 className="delete-button"
@@ -175,11 +184,11 @@ const CandidateList: React.FC = () => {
                 disabled={deletingId === candidate.id}
                 title="Delete candidate"
               >
-                {deletingId === candidate.id ? '🗑️' : '🗑️'}
+                {deletingId === candidate.id ? 'Deleting...' : 'Delete'}
               </button>
             </div>
             <div className="candidate-arrow">
-              <span>→</span>
+              <span>View Details</span>
             </div>
           </div>
         ))}
@@ -190,18 +199,23 @@ const CandidateList: React.FC = () => {
           <h2>No candidates found</h2>
           <p>There are currently no candidates available.</p>
           <button className="add-candidate-button" onClick={handleAddCandidate}>
-            + Add Your First Candidate
+            Add Your First Candidate
           </button>
         </div>
       )}
 
+      {/* Modal Form Overlay */}
       {showForm && (
-        <CandidateForm
-          candidate={editingCandidate}
-          onSave={handleFormSave}
-          onCancel={handleFormCancel}
-          mode={formMode}
-        />
+        <div className="modal-overlay" onClick={handleFormCancel}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <CandidateForm
+              candidate={editingCandidate}
+              onSave={handleFormSave}
+              onCancel={handleFormCancel}
+              mode={formMode}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

@@ -33,6 +33,31 @@
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.statistics-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.statistics-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
 .add-candidate-button {
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -68,6 +93,8 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .candidate-card:hover {
@@ -105,6 +132,7 @@
 
 .candidate-info {
   text-align: center;
+  flex: 1;
 }
 
 .candidate-name {
@@ -128,44 +156,44 @@
 .candidate-description {
   color: #666;
   line-height: 1.6;
-  margin-bottom: 0;
+  margin-bottom: 20px;
 }
 
 .candidate-actions {
-  position: absolute;
-  top: 15px;
-  right: 15px;
   display: flex;
-  gap: 8px;
-  opacity: 1;
+  gap: 10px;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
 }
 
 .edit-button,
 .delete-button {
-  background: rgba(255, 255, 255, 0.9);
+  background: #667eea;
+  color: white;
   border: none;
-  border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 1rem;
-  backdrop-filter: blur(5px);
+  min-width: 70px;
 }
 
 .edit-button:hover {
-  background: #667eea;
-  color: white;
-  transform: scale(1.1);
+  background: #5a6fd8;
+  transform: translateY(-2px);
+}
+
+.delete-button {
+  background: #e74c3c;
 }
 
 .delete-button:hover {
-  background: #e74c3c;
-  color: white;
-  transform: scale(1.1);
+  background: #c0392b;
+  transform: translateY(-2px);
 }
 
 .delete-button:disabled {
@@ -175,17 +203,15 @@
 }
 
 .candidate-arrow {
-  position: absolute;
-  top: 20px;
-  right: 20px;
+  text-align: center;
+  margin-top: 15px;
   color: #667eea;
-  font-size: 1.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .candidate-card:hover .candidate-arrow {
-  opacity: 1;
+  color: #5a6fd8;
 }
 
 .loading-spinner {
@@ -281,6 +307,10 @@
     font-size: 2rem;
   }
   
+  .header-actions {
+    justify-content: center;
+  }
+  
   .candidates-grid {
     grid-template-columns: 1fr;
     gap: 20px;
@@ -314,8 +344,60 @@
     font-size: 1.2rem;
   }
   
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .statistics-button,
   .add-candidate-button {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* Modal Overlay Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px) scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 } 

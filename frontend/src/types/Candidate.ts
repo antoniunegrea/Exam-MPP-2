@@ -1,6 +1,5 @@
 // Define the allowed party values
-export const ALLOWED_PARTIES = ['PSD', 'PNL', 'POT', 'AUR', 'Independent'] as const;
-export type Party = typeof ALLOWED_PARTIES[number];
+export type Party = 'PSD' | 'PNL' | 'POT' | 'AUR' | 'Independent';
 
 // Define the Candidate interface
 export interface Candidate {
@@ -11,100 +10,141 @@ export interface Candidate {
   party: Party;
 }
 
-// Sample list of candidates
-export const candidates: Candidate[] = [
-  {
-    id: 1,
-    name: "Calin Georgescu",
-    description: "An experienced leader focused on education and healthcare reform.",
-    image: "https://example.com/images/maria-popescu.jpg",
-    party: "Independent"
-  },
-  {
-    id: 2,
-    name: "Victor Ponta",
-    description: "Advocates for technology and innovation in public administration.",
-    image: "https://example.com/images/ion-ionescu.jpg",
-    party: "PSD"
-  },
-  {
-    id: 3,
-    name: "George Simion",
-    description: "Focused on environmental sustainability and green energy.",
-    image: "https://example.com/images/elena-georgescu.jpg",
-    party: "AUR"
-  }
-];
+export interface CreateCandidateRequest {
+  name: string;
+  description: string;
+  image: string;
+  party: Party;
+}
 
-// Service function to get candidates (ready for backend integration)
+export interface UpdateCandidateRequest {
+  name?: string;
+  description?: string;
+  image?: string;
+  party?: Party;
+}
+
+export const ALLOWED_PARTIES: Party[] = ['PSD', 'PNL', 'POT', 'AUR', 'Independent'];
+
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// API service functions
 export const getCandidates = async (): Promise<Candidate[]> => {
-  // TODO: Replace with actual API call
-  // return fetch('/api/candidates').then(res => res.json());
-  
-  // For now, return hardcoded data
-  return Promise.resolve(candidates);
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    throw error;
+  }
 };
 
-// Service function to get a single candidate by ID
 export const getCandidateById = async (id: number): Promise<Candidate | null> => {
-  // TODO: Replace with actual API call
-  // return fetch(`/api/candidates/${id}`).then(res => res.json());
-  
-  // For now, return hardcoded data
-  const candidate = candidates.find(c => c.id === id);
-  return Promise.resolve(candidate || null);
-};
-
-// Service function to create a new candidate
-export const createCandidate = async (candidate: Omit<Candidate, 'id'>): Promise<Candidate> => {
-  // TODO: Replace with actual API call
-  // return fetch('/api/candidates', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(candidate)
-  // }).then(res => res.json());
-  
-  // For now, simulate creation with a new ID
-  const newCandidate: Candidate = {
-    ...candidate,
-    id: Math.max(...candidates.map(c => c.id)) + 1
-  };
-  candidates.push(newCandidate);
-  return Promise.resolve(newCandidate);
-};
-
-// Service function to update a candidate
-export const updateCandidate = async (id: number, candidate: Partial<Candidate>): Promise<Candidate> => {
-  // TODO: Replace with actual API call
-  // return fetch(`/api/candidates/${id}`, {
-  //   method: 'PUT',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(candidate)
-  // }).then(res => res.json());
-  
-  // For now, update the local data
-  const index = candidates.findIndex(c => c.id === id);
-  if (index === -1) {
-    throw new Error('Candidate not found');
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/${id}`);
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching candidate:', error);
+    throw error;
   }
-  
-  candidates[index] = { ...candidates[index], ...candidate };
-  return Promise.resolve(candidates[index]);
 };
 
-// Service function to delete a candidate
+export const createCandidate = async (candidateData: CreateCandidateRequest): Promise<Candidate> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(candidateData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating candidate:', error);
+    throw error;
+  }
+};
+
+export const updateCandidate = async (id: number, candidateData: UpdateCandidateRequest): Promise<Candidate> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(candidateData),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating candidate:', error);
+    throw error;
+  }
+};
+
 export const deleteCandidate = async (id: number): Promise<void> => {
-  // TODO: Replace with actual API call
-  // return fetch(`/api/candidates/${id}`, {
-  //   method: 'DELETE'
-  // }).then(res => res.json());
-  
-  // For now, remove from local data
-  const index = candidates.findIndex(c => c.id === id);
-  if (index === -1) {
-    throw new Error('Candidate not found');
+  try {
+    const response = await fetch(`${API_BASE_URL}/candidates/${id}`, {
+      method: 'DELETE',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error deleting candidate:', error);
+    throw error;
   }
-  
-  candidates.splice(index, 1);
-  return Promise.resolve();
+};
+
+// Statistics API functions
+export const getStatistics = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/statistics`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching statistics:', error);
+    throw error;
+  }
+};
+
+export const generateFakeCandidate = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/statistics/generate`, {
+      method: 'POST',
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error generating candidate:', error);
+    throw error;
+  }
 }; 
